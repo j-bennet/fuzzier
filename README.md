@@ -42,10 +42,24 @@ soundex: [('Харьков, ул. Волонтерская д.72, кв.42', 95),
 metaphone: [('Харьков, ул. Волонтерская д.72, кв.42', 95), ('Волонтерская 72/42, Харьков', 95), ('Харьков, ул. Валонтерская 72-42', 90)]
 ```
 
-### Running on the full set of data
+### Running on 23609 addresses
 
-```json
-<function _calculate_similarity at 0x13c622e18> took 1:47:29.879752
+With rapidfuzz (workers=8):
+
+```
+Processing 23609 records
+<function _calculate_similarity at 0x13e197620> took 0:13:36.567446
+<function _make_clusters at 0x13e19f1e0> took 0:01:35.417061
+----------------------------------------
+Clusters: 2709
+<function _print_clusters at 0x13e19f2f0> took 0:00:00.000007
+<function main at 0x13e19f400> took 0:15:12.089553
 ```
 
-This needs to be parallelized.
+With Spark:
+
+```
+Records: 10000
+Clusters: 2899
+Elapsed: 0:04:30.616507
+```

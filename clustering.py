@@ -41,16 +41,16 @@ def timeme(func):
 
 @timeme
 def _calculate_similarity(texts):
-    return process.cdist(texts, texts, scorer=fuzz.WRatio, workers=4)
+    return process.cdist(texts, texts, scorer=fuzz.WRatio, workers=8)
 
 
 @timeme
-def _make_clusters(sim, cutoff=None):
+def _make_clusters(sim, *, min_similarity=None):
     dfs = pd.DataFrame(sim, columns=texts, index=texts)
     dfs = dfs.rename_axis("s1").reset_index()
     dfs = dfs.melt(id_vars=["s1"], var_name="s2", value_name="sim")
-    if cutoff is not None:
-        dfs = dfs[(dfs["sim"] > cutoff)]
+    if min_similarity is not None:
+        dfs = dfs[(dfs["sim"] >= min_similarity)]
     dfs = (dfs
            .groupby("s1")
            .filter(lambda g: len(g) > 1)
@@ -62,9 +62,9 @@ def _make_clusters(sim, cutoff=None):
 
 @timeme
 def _print_clusters(dfs):
-    for i, cluster in enumerate(dfs):
-        print(f"Cluster #{i} with {len(cluster)} items")
-        # pprint(cluster[:10])
+    # for i, cluster in enumerate(dfs):
+    #     print(f"Cluster #{i} with {len(cluster)} items")
+    #     pprint(cluster[:10])
     print("-" * 40)
     print(f"Clusters: {len(dfs)}")
 
@@ -89,25 +89,16 @@ def _print_clusters(dfs):
 
 
 @timeme
-def main(texts):
+def main(texts, *, min_similarity=None):
+    print(f"Processing {len(texts)} records")
     sim = _calculate_similarity(texts)
-    dfs = _make_clusters(sim, 90)
+    dfs = _make_clusters(sim, min_similarity=min_similarity)
     _print_clusters(dfs)
 
 
 if __name__ == "__main__":
     num_records = None
+    min_similarity = 90
     df = pd.read_csv("nccs.csv", nrows=num_records)
     texts = df["address"].to_list()
-    # texts = [
-    #         "Petr",
-    #         "Piotr",
-    #         "Pyotr",
-    #         "Michael",
-    #         "Misha",
-    #         "Michelle",
-    #         "Ivan",
-    #         "Evan",
-    #         "Owen",
-    #     ]
-    main(texts)
+    main(texts, min_similarity=min_similarity)

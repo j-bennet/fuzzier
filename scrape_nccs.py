@@ -35,6 +35,7 @@ def main():
             print(f" * {ncc_addr}")
             collected_data.append((full_ncc_url, ncc_name, ncc_addr))
     df = pd.DataFrame(collected_data, columns=["url", "name", "address"])
+    df = df.drop_duplicates()
     df.to_csv("nccs.csv", index=False)
     print(f"Total: {df.shape}")
 
