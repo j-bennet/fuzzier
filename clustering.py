@@ -98,7 +98,7 @@ def main(texts, *, min_similarity=None):
 
 if __name__ == "__main__":
     num_records = None
-    min_similarity = 90
+    min_similarity = 80
     df = pd.read_csv("nccs.csv", nrows=num_records)
     texts = df["address"].to_list()
     main(texts, min_similarity=min_similarity)

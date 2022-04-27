@@ -71,7 +71,7 @@ def main(sc, sqlContext, *, num_rows=None, num_partitions=None, min_similarity=N
 
 if __name__ == "__main__":
     partitions = 4
-    min_similarity = 70
+    min_similarity = 80
     rows = None
     sc, sqlContext = initialize(num_partitions=partitions)
     main(sc, sqlContext, num_rows=rows, num_partitions=partitions, min_similarity=min_similarity)
