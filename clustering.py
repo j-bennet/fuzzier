@@ -192,13 +192,13 @@ def main(texts, *, min_similarity=None, method=None, verbose=False):
         dfs = _make_clusters_tfidf(texts, min_similarity=min_similarity, top_n=None)
     else:
         raise NotImplementedError(f"Don't know how to handle method: {method}")
-    _print_clusters(dfs)
+    _print_clusters(dfs, verbose=verbose)
 
 
 if __name__ == "__main__":
     num_records = None
     min_similarity = 60
-    verbose = False
+    verbose = True
     df = pd.read_csv("nccs.csv", nrows=num_records)
     texts = df["address"].to_list()
     main(texts, min_similarity=min_similarity, method="tf-idf", verbose=verbose)
