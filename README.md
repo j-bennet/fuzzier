@@ -63,3 +63,15 @@ Records: 10000
 Clusters: 2899
 Elapsed: 0:04:30.616507
 ```
+
+With tf-idf (https://bergvca.github.io/2017/10/14/super-fast-string-matching.html):
+
+```
+Processing 23609 records
+<function _group_matches at 0x134f91510> took 0:00:01.381890
+<function _make_clusters_tfidf at 0x134f91620> took 0:00:04.665194
+----------------------------------------
+Clusters: 3925
+<function _print_clusters at 0x134f91840> took 0:00:00.000013
+<function main at 0x134f91950> took 0:00:04.665745
+```
