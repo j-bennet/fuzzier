@@ -1,77 +1,87 @@
-### Compare fuzzy matching libraries
+### Simplified clustering of 23609 addresses
 
-Compares results from:
+Reads a csv with `url,name,address` of Ripe NCC entities.
 
-* thefuzz
-* difflib
-* fonetika / soundex
-* fonetika / metaphone
+Creates a graph where keys are indices of NCCs that have "neigbors" selected by address similarity.
+The graph looks like this:
 
-Script output:
-
-```shell
-----------------------------------------
-word: Pyotr
-thefuzz: [('Piotr', 80), ('Petr', 67), ('Peter', 60)]
-difflib: [('Piotr', 80), ('Petr', 67), ('Peter', 60)]
-soundex: [('Petr', 100), ('Piotr', 100), ('Peter', 91)]
-metaphone: [('Piotr', 80), ('Petr', 67), ('Peter', 60)]
-----------------------------------------
-word: Иван
-thefuzz: [('Иванко', 90), ('Ваня', 75), ('Ванюша', 68)]
-difflib: [('Иванко', 80), ('Ваня', 50), ('Ванюша', 40)]
-soundex: [('Иванко', 83), ('Ваня', 60), ('Ванюша', 50)]
-metaphone: [('Иванко', 90), ('Ваня', 75), ('Ванюша', 68)]
-----------------------------------------
-word: Vladimirovich
-thefuzz: [('Wladymiryowich', 74), ('Wladimyrowitch', 74), ('Vladislavovich', 74)]
-difflib: [('Wladymiryowich', 74), ('Wladimyrowitch', 74), ('Vladislavovich', 74)]
-soundex: [('Vladislavovich', 81), ('Wladymiryowich', 78), ('Wladimyrowitch', 75)]
-metaphone: [('Wladymiryowich', 74), ('Wladimyrowitch', 74), ('Vladislavovich', 74)]
-----------------------------------------
-word: Chelyabinsk, ul. Lenina, d.15, kv.33
-thefuzz: [('Chelyabinsk, ul Lenina, 15-33', 95), ('Tchelabinsk Lenina 15-33', 86), ('Tchelabinsk ulitsa Lenina d 15 kv 33', 86)]
-difflib: [('Chelyabinsk, ul Lenina, 15-33', 86), ('Tchelabinsk ulitsa Lenina d 15 kv 33', 78), ('Tchelabinsk Lenina 15-33', 70)]
-soundex: [('Chelyabinsk, ul Lenina, 15-33', 95), ('Tchelabinsk Lenina 15-33', 86), ('Tchelabinsk ulitsa Lenina d 15 kv 33', 85)]
-metaphone: [('Chelyabinsk, ul Lenina, 15-33', 95), ('Tchelabinsk Lenina 15-33', 86), ('Tchelabinsk ulitsa Lenina d 15 kv 33', 86)]
-----------------------------------------
-word: Харьков, Волонтерская 72, кв. 42
-thefuzz: [('Харьков, ул. Волонтерская д.72, кв.42', 95), ('Волонтерская 72/42, Харьков', 95), ('Харьков, ул. Валонтерская 72-42', 86)]
-difflib: [('Харьков, ул. Волонтерская д.72, кв.42', 90), ('Харьков, ул. Валонтерская 72-42', 79), ('Волонтерская 72/42, Харьков', 58)]
-soundex: [('Харьков, ул. Волонтерская д.72, кв.42', 95), ('Харьков, ул. Валонтерская 72-42', 90), ('Волонтерская 72/42, Харьков', 69)]
-metaphone: [('Харьков, ул. Волонтерская д.72, кв.42', 95), ('Волонтерская 72/42, Харьков', 95), ('Харьков, ул. Валонтерская 72-42', 90)]
+```python
+graph = {
+    1: [2, 4],
+    2: [1],
+    4: [1]
+}
 ```
 
-### Running on 23609 addresses
+In the case above, the script will output that it found 3 clusters. Notice that it counts
+links in both directions. Node 1 is linked to node 2, but node 2 is also linked to node 1.
 
-With rapidfuzz (workers=8):
+The graph is sparse, nodes with no neighbors are not included.
+
+Script output with tf-idf (https://bergvca.github.io/2017/10/14/super-fast-string-matching.html):
 
 ```
+$ python clustering.py
 Processing 23609 records
-<function _calculate_similarity at 0x13e197620> took 0:13:36.567446
-<function _make_clusters at 0x13e19f1e0> took 0:01:35.417061
+<function _make_graph at 0x13116d598> took 0:00:00.097024
+<function _make_clusters_tfidf at 0x13116d6a8> took 0:00:03.565581
+<function make_graph at 0x13116d9d8> took 0:00:03.565625
 ----------------------------------------
-Clusters: 2709
-<function _print_clusters at 0x13e19f2f0> took 0:00:00.000007
-<function main at 0x13e19f400> took 0:15:12.089553
+Clusters: 6197
+<function print_graph at 0x13116d8c8> took 0:00:00.000010
+Wrote output data to output.csv
 ```
 
-With Spark:
+With rapidfuzz takes 17 min (workers=8), MacBook Pro 2020, 2.3 GHz, 32Gb of RAM:
 
 ```
-Records: 10000
-Clusters: 2899
-Elapsed: 0:04:30.616507
-```
-
-With tf-idf (https://bergvca.github.io/2017/10/14/super-fast-string-matching.html):
-
-```
+$ python clustering.py
 Processing 23609 records
-<function _group_matches at 0x134f91510> took 0:00:01.381890
-<function _make_clusters_tfidf at 0x134f91620> took 0:00:04.665194
+<function _make_graph at 0x139fc2510> took 0:00:00.747032
+<function _make_clusters_ratio at 0x139fc2730> took 0:17:22.536067
+<function make_graph at 0x139fc2950> took 0:17:22.536154
 ----------------------------------------
-Clusters: 3925
-<function _print_clusters at 0x134f91840> took 0:00:00.000013
-<function main at 0x134f91950> took 0:00:04.665745
+Clusters: 9442
+<function print_graph at 0x139fc2840> took 0:00:00.000013
 ```
+
+### Turning the knobs
+
+A few settings are defined in `clustering.py` in `main`. Those are good to experiment with.
+
+The script supports two methods to calculate similarity: `tf-idf` or `fuzz` (from `rapidfuzz` module). 
+
+The threshhold of similarity is set as `min_similarity` (1-100) in `clustering.py`.
+
+It's possible to set `num_records` in `clustering.py` to a smaller number of records, for easier testing.
+
+`write_output` can be set to True or False.
+
+`verbose` can be set to True or False, and will print all the graph nodes and their neighbors if True.
+
+For scoring with `rapidfuzz`, scorer is set to `fuzz.token_sort_ratio`, but `fuzz.token_sort_ratio` looks pretty good as well.
+
+### Result output
+
+Result output is written to csv as follows:
+
+```s1,s2,sim,i1,i2,name1,name2,url1,url2```
+
+* s1 = address of the 1st NCC
+* s1 = address of the 2nd NCC
+* sim - similarity score
+* i1 - index of the 1st NCC in `nccs.csv`
+* i2 - index of the 2nd NCC in `nccs.csv`
+* name1 - name of the 1st NCC in `nccs.csv`
+* name2 - name of the 2nd NCC in `nccs.csv`
+* url1 - index of the 1st NCC in `nccs.csv`
+* url2 - index of the 2nd NCC in `nccs.csv`
+
+Only records with `sim > min_similarity` are included.
+
+### Possible improvements
+
+Maybe use tf/idf with lower `min_similarity` (65?) as first stage, 
+then fuzzy ratio with higher `min_similarity` as 2nd stage, to filter
+out less likely candidates. Fuzzy ratio is slow, but if it's done
+on smaller sets of nodes already discovered by tf/idf, it won't be so bad.
