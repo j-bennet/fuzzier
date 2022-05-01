@@ -81,7 +81,13 @@ Only records with `sim > min_similarity` are included.
 
 ### Possible improvements
 
-Maybe use tf/idf with lower `min_similarity` (65?) as first stage, 
+1. Use tf/idf with lower `min_similarity` (65?) as first stage, 
 then fuzzy ratio with higher `min_similarity` as 2nd stage, to filter
 out less likely candidates. Fuzzy ratio is slow, but if it's done
 on smaller sets of nodes already discovered by tf/idf, it won't be so bad.
+
+2. Convert strings into phonetic representation first, with soundex
+or metaphone, before running the similarity algorithm. This would 
+cast a wider net and potentially identify more matches, but at the
+same time, some of the matches may be not so great.
+
